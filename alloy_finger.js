@@ -76,6 +76,11 @@
         this.element.addEventListener("touchstart", this.start, false);
         this.element.addEventListener("touchmove", this.move, false);
         this.element.addEventListener("touchend", this.end, false);
+
+        this.element.addEventListener("mousedown", this.start, false);
+        this.element.addEventListener("mousemove", this.move, false);
+        this.element.addEventListener("mouseup", this.end, false);
+
         this.element.addEventListener("touchcancel", this.cancel, false);
 
         this.preV = { x: null, y: null };
@@ -87,6 +92,7 @@
 
         this.rotate = wrapFunc(this.element, option.rotate || noop);
         this.touchStart = wrapFunc(this.element, option.touchStart || noop);
+
         this.multipointStart = wrapFunc(this.element, option.multipointStart || noop);
         this.multipointEnd = wrapFunc(this.element, option.multipointEnd || noop);
         this.pinch = wrapFunc(this.element, option.pinch || noop);
@@ -118,10 +124,13 @@
 
     AlloyFinger.prototype = {
         start: function (evt) {
-            if (!evt.touches) return;
+            evt.preventDefault()
+
+            this.active = true
+            //  if (!evt.touches) return;
             this.now = Date.now();
-            this.x1 = evt.touches[0].pageX;
-            this.y1 = evt.touches[0].pageY;
+            this.x1 = evt.pageX || evt.touches[0].pageX;
+            this.y1 = evt.pageY || evt.touches[0].pageY;
             this.delta = this.now - (this.last || this.now);
             this.touchStart.dispatch(evt, this.element);
             if (this.preTapPosition.x !== null) {
@@ -132,7 +141,7 @@
             this.preTapPosition.y = this.y1;
             this.last = this.now;
             var preV = this.preV,
-                len = evt.touches.length;
+                len = evt.touches ? evt.touches.length : 1;
             if (len > 1) {
                 this._cancelLongTap();
                 this._cancelSingleTap();
@@ -149,11 +158,15 @@
             }.bind(this), 750);
         },
         move: function (evt) {
-            if (!evt.touches) return;
+            // if (!evt.touches) return;
+            if (!evt.touches && !this.active) {
+                return
+            }
             var preV = this.preV,
-                len = evt.touches.length,
-                currentX = evt.touches[0].pageX,
-                currentY = evt.touches[0].pageY;
+                len = evt.touches ? evt.touches.length : 1;
+            currentX = evt.pageX || evt.touches[0].pageX;
+            currentY = evt.pageY || evt.touches[0].pageY;
+
             this.isDoubleTap = false;
             if (len > 1) {
                 var sCurrentX = evt.touches[1].pageX,
@@ -217,15 +230,17 @@
             }
         },
         end: function (evt) {
-            if (!evt.changedTouches) return;
+            this.active = false
+            if (evt.touches && !evt.changedTouches) return;
+
             this._cancelLongTap();
             var self = this;
-            if (evt.touches.length < 2) {
+            if (evt.touches && evt.touches.length < 2) {
                 this.multipointEnd.dispatch(evt, this.element);
                 this.sx2 = this.sy2 = null;
             }
 
-            //swipe 
+            //swipe
             if ((this.x2 && Math.abs(this.x1 - this.x2) > 30) ||
                 (this.y2 && Math.abs(this.y1 - this.y2) > 30)) {
                 evt.direction = this._swipeDirection(this.x1, this.x2, this.y1, this.y2);
@@ -302,6 +317,9 @@
             this.element.removeEventListener("touchstart", this.start);
             this.element.removeEventListener("touchmove", this.move);
             this.element.removeEventListener("touchend", this.end);
+            this.element.removeEventListener("mousedown", this.start);
+            this.element.removeEventListener("mousemove", this.move);
+            this.element.removeEventListener("mouseup", this.end);
             this.element.removeEventListener("touchcancel", this.cancel);
 
             this.rotate.del();
