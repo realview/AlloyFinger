@@ -6,12 +6,7 @@
   "directories": {
     "example": "example"
   },
-  "scripts": {
-    "prepare": "npm run build",
-    "build": "if [ -d dist ]; then rm -r dist; fi; npm run build:react",
-    "build:react": "babel react --out-dir dist/react --source-map",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "devDependencies": {
     "babel-cli": "^6.24.0",
     "babel-core": "^6.24.0",
