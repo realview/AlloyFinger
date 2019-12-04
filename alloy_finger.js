@@ -32,29 +32,29 @@
         return angle * 180 / Math.PI;
     }
 
-    var HandlerAdmin = function(el) {
+    var HandlerAdmin = function (el) {
         this.handlers = [];
         this.el = el;
     };
 
-    HandlerAdmin.prototype.add = function(handler) {
+    HandlerAdmin.prototype.add = function (handler) {
         this.handlers.push(handler);
     }
 
-    HandlerAdmin.prototype.del = function(handler) {
-        if(!handler) this.handlers = [];
+    HandlerAdmin.prototype.del = function (handler) {
+        if (!handler) this.handlers = [];
 
-        for(var i=this.handlers.length; i>=0; i--) {
-            if(this.handlers[i] === handler) {
+        for (var i = this.handlers.length; i >= 0; i--) {
+            if (this.handlers[i] === handler) {
                 this.handlers.splice(i, 1);
             }
         }
     }
 
-    HandlerAdmin.prototype.dispatch = function() {
-        for(var i=0,len=this.handlers.length; i<len; i++) {
+    HandlerAdmin.prototype.dispatch = function () {
+        for (var i = 0, len = this.handlers.length; i < len; i++) {
             var handler = this.handlers[i];
-            if(typeof handler === 'function') handler.apply(this.el, arguments);
+            if (typeof handler === 'function') handler.apply(this.el, arguments);
         }
     }
 
@@ -193,7 +193,7 @@
                     var movedX = Math.abs(this.x1 - this.x2),
                         movedY = Math.abs(this.y1 - this.y2);
 
-                    if(movedX > 10 || movedY > 10){
+                    if (movedX > 10 || movedY > 10) {
                         this._preventTap = true;
                     }
 
@@ -201,8 +201,8 @@
                     evt.deltaX = 0;
                     evt.deltaY = 0;
                 }
-                
-                
+
+
                 this.pressMove.dispatch(evt, this.element);
             }
 
@@ -211,7 +211,7 @@
             this._cancelLongTap();
             this.x2 = currentX;
             this.y2 = currentY;
-            
+
             if (len > 1) {
                 evt.preventDefault();
             }
@@ -225,7 +225,7 @@
                 this.sx2 = this.sy2 = null;
             }
 
-            //swipe
+            //swipe 
             if ((this.x2 && Math.abs(this.x1 - this.x2) > 30) ||
                 (this.y2 && Math.abs(this.y1 - this.y2) > 30)) {
                 evt.direction = this._swipeDirection(this.x1, this.x2, this.y1, this.y2);
@@ -235,7 +235,7 @@
                 }, 0)
             } else {
                 this.tapTimeout = setTimeout(function () {
-                    if(!self._preventTap){
+                    if (!self._preventTap) {
                         self.tap.dispatch(evt, self.element);
                     }
                     // trigger double tap immediately
@@ -281,23 +281,23 @@
             return Math.abs(x1 - x2) >= Math.abs(y1 - y2) ? (x1 - x2 > 0 ? 'Left' : 'Right') : (y1 - y2 > 0 ? 'Up' : 'Down')
         },
 
-        on: function(evt, handler) {
-            if(this[evt]) {
+        on: function (evt, handler) {
+            if (this[evt]) {
                 this[evt].add(handler);
             }
         },
 
-        off: function(evt, handler) {
-            if(this[evt]) {
+        off: function (evt, handler) {
+            if (this[evt]) {
                 this[evt].del(handler);
             }
         },
 
-        destroy: function() {
-            if(this.singleTapTimeout) clearTimeout(this.singleTapTimeout);
-            if(this.tapTimeout) clearTimeout(this.tapTimeout);
-            if(this.longTapTimeout) clearTimeout(this.longTapTimeout);
-            if(this.swipeTimeout) clearTimeout(this.swipeTimeout);
+        destroy: function () {
+            if (this.singleTapTimeout) clearTimeout(this.singleTapTimeout);
+            if (this.tapTimeout) clearTimeout(this.tapTimeout);
+            if (this.longTapTimeout) clearTimeout(this.longTapTimeout);
+            if (this.swipeTimeout) clearTimeout(this.swipeTimeout);
 
             this.element.removeEventListener("touchstart", this.start);
             this.element.removeEventListener("touchmove", this.move);
