@@ -67,6 +67,9 @@
 
     var AlloyFinger = function (el, option) {
 
+        if (!option.config) {
+            option.config = {}
+        }
         this.element = typeof el == 'string' ? document.querySelector(el) : el;
 
         this.start = this.start.bind(this);
@@ -120,6 +123,12 @@
         this.swipeTimeout = null;
         this.x1 = this.x2 = this.y1 = this.y2 = null;
         this.preTapPosition = { x: null, y: null };
+
+        this.config = {
+            swipeDistanceThreshold: option.config.swipeDistanceThreshold || 100, //
+            swipeVelocityThreshold: option.config.swipeVelocityThreshold || 0.3  // px per ms
+        }
+
     };
 
     AlloyFinger.prototype = {
@@ -241,14 +250,30 @@
             }
 
             //swipe
-            if ((this.x2 && Math.abs(this.x1 - this.x2) > 30) ||
-                (this.y2 && Math.abs(this.y1 - this.y2) > 30)) {
+
+            var xMovement = Math.abs(this.x1 - this.x2)
+            var yMovement = Math.abs(this.y1 - this.y2)
+            var endTime = Date.now()
+            var actionTime = endTime - this.now;
+
+            if ((this.x2 &&
+                xMovement > this.config.swipeDistanceThreshold &&
+                xMovement / actionTime > this.config.swipeVelocityThreshold
+            ) ||
+                (
+                    this.y2 &&
+                    yMovement > this.config.swipeDistanceThreshold &&
+                    yMovement / actionTime > this.config.swipeVelocityThreshold
+                )) {
+
+
                 evt.direction = this._swipeDirection(this.x1, this.x2, this.y1, this.y2);
                 this.swipeTimeout = setTimeout(function () {
                     self.swipe.dispatch(evt, self.element);
-
                 }, 0)
-            } else {
+
+            }
+            else {
                 this.tapTimeout = setTimeout(function () {
                     if (!self._preventTap) {
                         self.tap.dispatch(evt, self.element);
