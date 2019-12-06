@@ -143,7 +143,7 @@
             this.delta = this.now - (this.last || this.now);
             this.touchStart.dispatch(evt, this.element);
             if (this.preTapPosition.x !== null) {
-                this.isDoubleTap = (this.delta > 50 && this.delta <= 250 && Math.abs(this.preTapPosition.x - this.x1) < 30 && Math.abs(this.preTapPosition.y - this.y1) < 30);
+                this.isDoubleTap = (this.delta > 100 && this.delta <= 300 && Math.abs(this.preTapPosition.x - this.x1) < 30 && Math.abs(this.preTapPosition.y - this.y1) < 30);
                 if (this.isDoubleTap) {
                     this.shouldPreventDefault = true
                     clearTimeout(this.singleTapTimeout);
