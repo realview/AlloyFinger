@@ -83,7 +83,7 @@
         this.element.addEventListener("mousedown", this.start, false);
         this.element.addEventListener("mousemove", this.move, false);
         this.element.addEventListener("mouseup", this.end, false);
-
+        this.element.addEventListener("click", this.end, false);
         this.element.addEventListener("touchcancel", this.cancel, false);
 
         this.preV = { x: null, y: null };
@@ -133,7 +133,7 @@
 
     AlloyFinger.prototype = {
         start: function (evt) {
-            evt.preventDefault()
+
 
             this.active = true
             //  if (!evt.touches) return;
@@ -144,7 +144,10 @@
             this.touchStart.dispatch(evt, this.element);
             if (this.preTapPosition.x !== null) {
                 this.isDoubleTap = (this.delta > 0 && this.delta <= 250 && Math.abs(this.preTapPosition.x - this.x1) < 30 && Math.abs(this.preTapPosition.y - this.y1) < 30);
-                if (this.isDoubleTap) clearTimeout(this.singleTapTimeout);
+                if (this.isDoubleTap) {
+                    this.shouldPreventDefault = true
+                    clearTimeout(this.singleTapTimeout);
+                }
             }
             this.preTapPosition.x = this.x1;
             this.preTapPosition.y = this.y1;
@@ -152,6 +155,7 @@
             var preV = this.preV,
                 len = evt.touches ? evt.touches.length : 1;
             if (len > 1) {
+                this.shouldPreventDefault = true
                 this._cancelLongTap();
                 this._cancelSingleTap();
                 var v = { x: evt.touches[1].pageX - this.x1, y: evt.touches[1].pageY - this.y1 };
@@ -168,9 +172,11 @@
         },
         move: function (evt) {
             // if (!evt.touches) return;
+
             if (!evt.touches && !this.active) {
                 return
             }
+            this.shouldPreventDefault = true
             var preV = this.preV,
                 len = evt.touches ? evt.touches.length : 1;
             currentX = evt.pageX || evt.touches[0].pageX;
@@ -240,8 +246,12 @@
         },
         end: function (evt) {
             this.active = false
+            var self = this;
             if (evt.touches && !evt.changedTouches) return;
-
+            if (this.shouldPreventDefault == true) {
+                evt.preventDefault()
+                setTimeout(function () { self.shouldPreventDefault = false }, 100)
+            }
             this._cancelLongTap();
             var self = this;
             if (evt.touches && evt.touches.length < 2) {
