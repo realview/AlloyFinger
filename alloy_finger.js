@@ -82,7 +82,7 @@
 
         this.element.addEventListener("mousedown", this.start, false);
         this.element.addEventListener("mousemove", this.move, false);
-        this.element.addEventListener("mouseup", this.end, false);
+
         this.element.addEventListener("click", this.end, false);
         this.element.addEventListener("touchcancel", this.cancel, false);
 
@@ -123,24 +123,34 @@
         this.swipeTimeout = null;
         this.x1 = this.x2 = this.y1 = this.y2 = null;
         this.preTapPosition = { x: null, y: null };
-
+        this.active = null
         this.config = {
             swipeDistanceThreshold: option.config.swipeDistanceThreshold || 100, //
             swipeVelocityThreshold: option.config.swipeVelocityThreshold || 0.3  // px per ms
         }
+        this.isTouchDevice = false
 
     };
 
     AlloyFinger.prototype = {
         start: function (evt) {
 
-
+            // handle devices that dispatch touch AND mouse events, eg desktop browser in touch emulation mode
+            // in this case, ignore mouse events
+            if (evt.touches) {
+                this.isTouchDevice = true;
+            }
+            if (!evt.touches && this.isTouchDevice) {
+                return
+            }
             this.active = true
             //  if (!evt.touches) return;
             this.now = Date.now();
+
             this.x1 = evt.pageX || evt.touches[0].pageX;
             this.y1 = evt.pageY || evt.touches[0].pageY;
             this.delta = this.now - (this.last || this.now);
+
             this.touchStart.dispatch(evt, this.element);
             if (this.preTapPosition.x !== null) {
                 this.isDoubleTap = (this.delta > 100 && this.delta <= 300 && Math.abs(this.preTapPosition.x - this.x1) < 30 && Math.abs(this.preTapPosition.y - this.y1) < 30);
@@ -221,7 +231,7 @@
                     var movedX = Math.abs(this.x1 - this.x2),
                         movedY = Math.abs(this.y1 - this.y2);
 
-                    if (movedX > 10 || movedY > 10) {
+                    if (movedX > 5 || movedY > 5) {
                         this._preventTap = true;
                     }
 
@@ -260,7 +270,7 @@
             }
 
             //swipe
-
+            var actionableEvent = false;
             var xMovement = Math.abs(this.x1 - this.x2)
             var yMovement = Math.abs(this.y1 - this.y2)
             var endTime = Date.now()
@@ -276,7 +286,7 @@
                     yMovement / actionTime > this.config.swipeVelocityThreshold
                 )) {
 
-
+                actionableEvent = true;
                 evt.direction = this._swipeDirection(this.x1, this.x2, this.y1, this.y2);
                 this.swipeTimeout = setTimeout(function () {
                     self.swipe.dispatch(evt, self.element);
@@ -286,23 +296,26 @@
             else {
                 this.tapTimeout = setTimeout(function () {
                     if (!self._preventTap) {
+                        actionableEvent = true;
                         self.tap.dispatch(evt, self.element);
                     }
                     // trigger double tap immediately
                     if (self.isDoubleTap) {
+                        actionableEvent = true
                         self.doubleTap.dispatch(evt, self.element);
                         self.isDoubleTap = false;
                     }
                 }, 0)
 
-                if (!self.isDoubleTap) {
+                if (!self.isDoubleTap && !self._preventTap) {
+                    actionableEvent = true
                     self.singleTapTimeout = setTimeout(function () {
                         self.singleTap.dispatch(evt, self.element);
                     }, 250);
                 }
             }
 
-            this.touchEnd.dispatch(evt, this.element);
+            this.touchEnd.dispatch(evt, this.element, actionableEvent);
 
             this.preV.x = 0;
             this.preV.y = 0;
@@ -354,7 +367,7 @@
             this.element.removeEventListener("touchend", this.end);
             this.element.removeEventListener("mousedown", this.start);
             this.element.removeEventListener("mousemove", this.move);
-            this.element.removeEventListener("mouseup", this.end);
+            this.element.removeEventListener("click", this.end);
             this.element.removeEventListener("touchcancel", this.cancel);
 
             this.rotate.del();

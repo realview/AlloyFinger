@@ -1,8 +1,9 @@
 ﻿<!DOCTYPE html>
 <html>
+
 <head>
     <title>AlloyFinger</title>
-    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
     <style>
         .ribbon {
             top: 3.2em;
@@ -12,7 +13,7 @@
             -ms-transform: rotate(45deg);
             -o-transform: rotate(45deg);
             transform: rotate(45deg);
-            color:#fff;
+            color: #fff;
             display: block;
             padding: .6em 3.5em;
             position: fixed;
@@ -27,6 +28,7 @@
         }
     </style>
 </head>
+
 <body>
     <a href="https://github.com/AlloyTeam/AlloyFinger" class="ribbon">Fork me on Github</a>
     <script src="../../asset/transform.js"></script>
@@ -40,10 +42,10 @@
 
     <script>
         var topPx;
-        imageLoaded("#testImg",function(w,h){
-            document.querySelector("#imgBox").style.display="block";
-            topPx=window.innerHeight/2-(h*window.innerWidth/w)/2;
-            this.style.top=topPx+"px";
+        imageLoaded("#testImg", function (w, h) {
+            document.querySelector("#imgBox").style.display = "block";
+            topPx = window.innerHeight / 2 - (h * window.innerWidth / w) / 2;
+            this.style.top = topPx + "px";
         });
 
 
@@ -79,8 +81,8 @@
                 }
                 var rotation = el.rotateZ % 360;
 
-                if (rotation < 0)rotation = 360 + rotation;
-                el.rotateZ=rotation;
+                if (rotation < 0) rotation = 360 + rotation;
+                el.rotateZ = rotation;
 
                 if (rotation > 0 && rotation < 45) {
                     new To(el, "rotateZ", 0, 500, ease);
@@ -105,6 +107,8 @@
             },
             doubleTap: function (evt) {
                 To.stopAll();
+                let touchY = evt.changedTouches ? evt.changedTouches[0].pageY : evt.pageY
+                let touchX = evt.changedTouches ? evt.changedTouches[0].pageX : evt.pageX
                 if (el.scaleX > 1.5) {
 
                     new To(el, "scaleX", 1, 500, ease);
@@ -113,11 +117,11 @@
                     new To(el, "translateY", 0, 500, ease);
                 } else {
                     var box = el.getBoundingClientRect();
-                    var y = box.height - (( evt.changedTouches[0].pageY - topPx) * 2) - (box.height / 2 - ( evt.changedTouches[0].pageY - topPx));
+                    var y = box.height - ((touchY - topPx) * 3) - (box.height / 3 - (touchY - topPx));
 
-                    var x = box.width - (( evt.changedTouches[0].pageX) * 2) - (box.width / 2 - ( evt.changedTouches[0].pageX));
-                    new To(el, "scaleX", 2, 500, ease);
-                    new To(el, "scaleY", 2, 500, ease);
+                    var x = box.width - ((touchX) * 3) - (box.width / 3 - (touchX));
+                    new To(el, "scaleX", 3, 500, ease);
+                    new To(el, "scaleY", 3, 500, ease);
                     new To(el, "translateX", x, 500, ease);
                     new To(el, "translateY", y, 500, ease);
                 }
@@ -134,4 +138,5 @@
 
     </script>
 </body>
+
 </html>
